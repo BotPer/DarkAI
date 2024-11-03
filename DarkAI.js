@@ -5,7 +5,7 @@ class DarkAI {
     constructor() {
         this.url = 'https://www.aiuncensored.info';
         this.apiEndpoint = 'https://darkai.foundation/chat';
-        this.defaultModel = 'gpt-4o';
+        this.defaultModel = 'ai_uncensored';
         this.models = [
             this.defaultModel, // Uncensored
             'gpt-3.5-turbo', // Uncensored
