@@ -1,3 +1,4 @@
+
 const express = require('express');
 const DarkAI = require('./DarkAI'); // Ganti dengan path file DarkAI
 const app = express();
@@ -7,15 +8,16 @@ app.use(express.json());
 
 const darkAI = new DarkAI();
 
-app.post('/api/chat', async (req, res) => {
-    const { model, messages } = req.body;
+app.get('/api/chat', async (req, res) => {
+    const { model, messages } = req.query;
 
-    if (!messages || !Array.isArray(messages)) {
+    if (!messages || !Array.isArray(JSON.parse(messages))) {
         return res.status(400).json({ error: 'Messages harus berupa array.' });
     }
 
     try {
-        const result = await darkAI.createAsyncGenerator(model, messages);
+        const messagesArray = JSON.parse(messages);
+        const result = await darkAI.createAsyncGenerator(model, messagesArray);
         res.status(200).json({ response: result });
     } catch (error) {
         console.error('Terjadi kesalahan:', error);
