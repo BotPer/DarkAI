@@ -9,15 +9,14 @@ app.use(express.json());
 const darkAI = new DarkAI();
 
 app.get('/api/chat', async (req, res) => {
-    const { model, messages } = req.query;
+    const { model, message } = req.query;
 
-    if (!messages || !Array.isArray(JSON.parse(messages))) {
-        return res.status(400).json({ error: 'Messages harus berupa array.' });
+    if (!message) {
+        return res.status(400).json({ error: 'Message tidak boleh kosong.' });
     }
 
     try {
-        const messagesArray = JSON.parse(messages);
-        const result = await darkAI.createAsyncGenerator(model, messagesArray);
+        const result = await darkAI.createAsyncGenerator(model, [{ text: message }]);
         res.status(200).json({ response: result });
     } catch (error) {
         console.error('Terjadi kesalahan:', error);
