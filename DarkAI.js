@@ -1,5 +1,5 @@
+
 const axios = require('axios');
-const EventSource = require('eventsource');
 
 class DarkAI {
     constructor() {
