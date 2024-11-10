@@ -1,10 +1,15 @@
-
 const express = require('express');
-const DarkAI = require('./DarkAI'); // Ganti dengan path file DarkAI
+const path = require('path');
+const DarkAI = require('./DarkAI');
 const app = express();
-const PORT = process.env.PORT || 3000; // Gunakan PORT dari environment atau default ke 3000
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
+
+// Servir le fichier HTML
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 const darkAI = new DarkAI();
 
