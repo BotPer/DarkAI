@@ -28,67 +28,60 @@ class DarkAI {
         }
     }
 
-    async createAsyncGenerator(model, messages, proxy = null) {
-        model = this.getModel(model);
-        
-        const headers = {
-            'accept': 'text/event-stream',
-            'content-type': 'application/json',
-            'origin': 'https://www.aiuncensored.info',
-            'referer': 'https://www.aiuncensored.info/',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36'
-        };
+   async createAsyncGenerator(model, messages, proxy = null) {
+    model = this.getModel(model);
 
-        const prompt = this.formatPrompt(messages);
-        const data = {
-            query: prompt,
-            model: model,
-        };
+    const headers = {
+        'accept': 'text/event-stream',
+        'content-type': 'application/json',
+        'origin': 'https://www.aiuncensored.info',
+        'referer': 'https://www.aiuncensored.info/',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36'
+    };
 
-        try {
-            const response = await axios.post(this.apiEndpoint, data, {
-                headers,
-                proxy: proxy ? { host: proxy } : undefined,
-                responseType: 'stream'
-            });
+    const prompt = this.formatPrompt(messages);
+    const data = {
+        query: prompt,
+        model: model,
+    };
 
-            return new Promise((resolve, reject) => {
-                let fullText = '';
-                response.data.on('data', (chunk) => {
-                    try {
-                        const chunkStr = chunk.toString().trim();
-                        if (chunkStr.startsWith('data: ')) {
-                            const chunkData = JSON.parse(chunkStr.substring(6));
-                            if (chunkData.event === 'text-chunk') {
-                                fullText += chunkData.data.text;
-                            } else if (chunkData.event === 'stream-end') {
-                                if (fullText) resolve(fullText.trim());
-                                else resolve();
-                            }
+    try {
+        const response = await axios.post(this.apiEndpoint, data, {
+            headers,
+            proxy: proxy ? { host: proxy } : undefined,
+            responseType: 'stream'
+        });
+
+        return new Promise((resolve, reject) => {
+            let fullText = '';
+            response.data.on('data', (chunk) => {
+                try {
+                    const chunkStr = chunk.toString().trim();
+                    if (chunkStr.startsWith('data: ')) {
+                        const chunkData = JSON.parse(chunkStr.substring(6));
+                        if (chunkData.event === 'text-chunk') {
+                            // Utilisation de regex pour nettoyer les caractères non imprimables
+                            const cleanText = chunkData.data.text.replace(/[^\x20-\x7E\n]/g, '');
+                            fullText += cleanText;
+                        } else if (chunkData.event === 'stream-end') {
+                            resolve(fullText.trim());
                         }
-                    } catch (err) {
-                        console.error(`Error processing chunk: ${err}`);
                     }
-                });
-
-                response.data.on('end', () => {
-                    if (fullText) resolve(fullText.trim());
-                });
-
-                response.data.on('error', (err) => {
-                    reject(`Error in stream: ${err}`);
-                });
+                } catch (err) {
+                    console.error(`Error processing chunk: ${err}`);
+                }
             });
-        } catch (error) {
-            console.error(`Request failed: ${error}`);
-            throw error;
-        }
-    }
 
-    formatPrompt(messages) {
-        // Implementasi format prompt untuk menggabungkan pesan
-        return messages.map(msg => msg.text).join('\n');
+            response.data.on('end', () => {
+                resolve(fullText.trim());
+            });
+
+            response.data.on('error', (err) => {
+                reject(`Error in stream: ${err}`);
+            });
+        });
+    } catch (error) {
+        console.error(`Request failed: ${error}`);
+        throw error;
     }
 }
-
-module.exports = DarkAI;
