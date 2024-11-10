@@ -46,21 +46,21 @@ class DarkAI {
             });
 
             return new Promise((resolve, reject) => {
-                let fullText = '';
+                let textFragments = [];
+                
                 response.data.on('data', (chunk) => {
                     try {
                         const chunkStr = chunk.toString('utf8').trim();
                         if (chunkStr.startsWith('data: ')) {
                             const chunkData = JSON.parse(chunkStr.substring(6));
                             if (chunkData.event === 'text-chunk') {
-                                // Nettoyage des caractères non lisibles
+                                // Nettoyage des caractères non lisibles et ajout d'un espace si le fragment est incomplet
                                 const cleanText = chunkData.data.text.replace(/[^\x20-\x7E\n]/g, '');
                                 if (cleanText.length > 1) {
-                                    fullText += cleanText;
+                                    textFragments.push(cleanText.endsWith('.') ? cleanText : `${cleanText} `);
                                 }
                             } else if (chunkData.event === 'stream-end') {
-                                if (fullText) resolve(fullText.trim());
-                                else resolve();
+                                resolve(textFragments.join('').trim());
                             }
                         }
                     } catch (err) {
@@ -69,7 +69,7 @@ class DarkAI {
                 });
 
                 response.data.on('end', () => {
-                    if (fullText) resolve(fullText.trim());
+                    resolve(textFragments.join('').trim());
                 });
 
                 response.data.on('error', (err) => {
