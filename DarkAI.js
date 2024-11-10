@@ -6,9 +6,9 @@ class DarkAI {
         this.apiEndpoint = 'https://darkai.foundation/chat';
         this.defaultModel = 'gpt-3.5-turbo';
         this.models = [
-            this.defaultModel, // Uncensored
-            'gpt-3.5-turbo', // Uncensored
-            'llama-3-70b', // Uncensored
+            this.defaultModel,
+            'gpt-3.5-turbo',
+            'llama-3-70b',
             'llama-3-405b',
         ];
         this.modelAliases = {
@@ -18,13 +18,7 @@ class DarkAI {
     }
 
     getModel(model) {
-        if (this.models.includes(model)) {
-            return model;
-        } else if (this.modelAliases[model]) {
-            return this.modelAliases[model];
-        } else {
-            return this.defaultModel;
-        }
+        return this.models.includes(model) ? model : this.modelAliases[model] || this.defaultModel;
     }
 
     async createAsyncGenerator(model, messages, proxy = null) {
@@ -55,10 +49,11 @@ class DarkAI {
                 let fullText = '';
                 response.data.on('data', (chunk) => {
                     try {
-                        const chunkStr = chunk.toString().trim();
+                        const chunkStr = chunk.toString('utf8').trim();
                         if (chunkStr.startsWith('data: ')) {
                             const chunkData = JSON.parse(chunkStr.substring(6));
                             if (chunkData.event === 'text-chunk') {
+                                // Suppression des caractères non lisibles
                                 const cleanText = chunkData.data.text.replace(/[^\x20-\x7E\n]/g, '');
                                 fullText += cleanText;
                             } else if (chunkData.event === 'stream-end') {
@@ -91,4 +86,3 @@ class DarkAI {
 }
 
 module.exports = DarkAI;
-          
