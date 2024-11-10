@@ -53,9 +53,11 @@ class DarkAI {
                         if (chunkStr.startsWith('data: ')) {
                             const chunkData = JSON.parse(chunkStr.substring(6));
                             if (chunkData.event === 'text-chunk') {
-                                // Suppression des caractères non lisibles
+                                // Nettoyage des caractères non lisibles
                                 const cleanText = chunkData.data.text.replace(/[^\x20-\x7E\n]/g, '');
-                                fullText += cleanText;
+                                if (cleanText.length > 1) {
+                                    fullText += cleanText;
+                                }
                             } else if (chunkData.event === 'stream-end') {
                                 if (fullText) resolve(fullText.trim());
                                 else resolve();
