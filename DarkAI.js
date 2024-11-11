@@ -1,4 +1,4 @@
-const axios = require('axios');
+const fetch = require('node-fetch'); // Assurez-vous d'avoir importé fetch
 
 class DarkAI {
   constructor() {
@@ -35,10 +35,17 @@ class DarkAI {
         body: JSON.stringify(payload)
       });
 
-      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+      const responseText = await response.text();
 
-      const data = await response.json();
-      return data.text || "No response message found";
+      try {
+        // Vérifie si la réponse peut être analysée en JSON
+        const jsonResponse = JSON.parse(responseText);
+        return jsonResponse.text || "No message in JSON response";
+      } catch {
+        // Si ce n'est pas du JSON, retourne le texte brut
+        return responseText;
+      }
+
     } catch (error) {
       console.error('Error fetching AI response:', error);
       return "Error fetching AI response: " + error.message;
@@ -46,7 +53,6 @@ class DarkAI {
   }
 
   async createAsyncGenerator(model, messages) {
-    // Utilisez fetchResponse pour obtenir la réponse
     const message = messages[0].text;
     return await this.fetchResponse(message);
   }
