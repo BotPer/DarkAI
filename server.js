@@ -4,33 +4,31 @@ const DarkAI = require('./DarkAI');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware pour les fichiers statiques dans le dossier 'public'
-app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Servir la page HTML principale
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 const darkAI = new DarkAI();
 
-app.get('/api/chat', async (req, res) => {
-    const { model, message } = req.query;
+app.post('/api/chat', async (req, res) => {
+    const { model, message } = req.body;
 
     if (!message) {
-        return res.status(400).json({ error: 'Message non fourni' });
+        return res.status(400).json({ error: "Message manquant" });
     }
 
     try {
-        const result = await darkAI.createAsyncGenerator(model, [{ text: message }]);
+        const result = await darkAI.createAsyncGenerator(model, message);
         res.status(200).json({ response: result });
     } catch (error) {
-        console.error('Erreur:', error);
-        res.status(500).json({ error: 'Erreur lors de la récupération de la réponse de l\'IA' });
+        console.error("Erreur serveur:", error);
+        res.status(500).json({ error: "Erreur lors de la réponse de l'IA" });
     }
 });
 
 app.listen(PORT, () => {
-    console.log(`Serveur démarré sur le port ${PORT}`);
+    console.log(`Serveur en marche sur le port ${PORT}`);
 });
