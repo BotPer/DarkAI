@@ -1,65 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DarkAI Chat Interface</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        #response {
-            margin-top: 20px;
-            padding: 10px;
-            background: #f4f4f4;
-            border: 1px solid #ddd;
-        }
-        .error {
-            color: red;
-        }
-    </style>
+    <title>Discussion avec DarkAI</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>DarkAI Chat Interface</h1>
-    <form id="chat-form">
-        <label for="model">Choose a model:</label>
-        <select id="model" name="model">
-            <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
-            <option value="llama-3-70b">llama-3-70b</option>
-            <option value="llama-3-405b">llama-3-405b</option>
-        </select>
 
-        <label for="message">Message:</label>
-        <textarea id="message" name="message" rows="4" cols="50" required></textarea>
+    <div class="chat-container">
+        <header class="chat-header">
+            <h2>💬 DarkAI - Votre Assistant Virtuel</h2>
+        </header>
+        <div class="chat-box" id="chat-box">
+            <!-- Les messages apparaîtront ici -->
+        </div>
+        <form id="chat-form" class="chat-input-container">
+            <input type="text" id="user-input" class="chat-input" placeholder="Tapez votre message..." autocomplete="off" required>
+            <button type="submit" class="send-button">➤</button>
+        </form>
+    </div>
 
-        <button type="submit">Send</button>
-    </form>
-
-    <div id="response"></div>
-
-    <script>
-        document.getElementById('chat-form').addEventListener('submit', async (event) => {
-            event.preventDefault();
-            
-            const model = document.getElementById('model').value;
-            const message = document.getElementById('message').value;
-            const responseDiv = document.getElementById('response');
-            responseDiv.innerHTML = 'Loading...';
-
-            try {
-                const response = await fetch(`/api/chat?model=${model}&message=${encodeURIComponent(message)}`);
-                const data = await response.json();
-                
-                if (response.ok) {
-                    responseDiv.innerHTML = `<strong>Response:</strong> ${data.response}`;
-                } else {
-                    responseDiv.innerHTML = `<span class="error">Error: ${data.error}</span>`;
-                }
-            } catch (error) {
-                responseDiv.innerHTML = `<span class="error">An error occurred: ${error.message}</span>`;
-            }
-        });
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
