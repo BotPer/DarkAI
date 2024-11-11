@@ -1,37 +1,46 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const chatForm = document.getElementById("chat-form");
     const chatBox = document.getElementById("chat-box");
     const userInput = document.getElementById("user-input");
+    const sendButton = document.getElementById("send-button");
 
-    chatForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        
+    async function sendMessage() {
         const message = userInput.value.trim();
-        if (message) {
-            addMessage("user", message);
-            userInput.value = "";
+        if (!message) return;
 
-            try {
-                const response = await fetch(`/api/chat?model=gpt-3.5-turbo&message=${encodeURIComponent(message)}`);
-                const data = await response.json();
+        addMessageToChat("Vous", message);
+        userInput.value = "";
 
-                if (data.response) {
-                    addMessage("ai", data.response);
-                } else {
-                    addMessage("ai", "Désolé, je n'ai pas pu traiter votre demande.");
-                }
-            } catch (error) {
-                console.error("Erreur:", error);
-                addMessage("ai", "Une erreur s'est produite. Réessayez plus tard.");
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ model: "gpt-3.5-turbo-0613", message }),
+            });
+
+            const data = await response.json();
+            if (data.response) {
+                addMessageToChat("IA", data.response);
+            } else {
+                addMessageToChat("Erreur", "Pas de réponse de l'IA.");
             }
+        } catch (error) {
+            addMessageToChat("Erreur", "Erreur de connexion au serveur.");
+            console.error(error);
         }
-    });
-
-    function addMessage(sender, text) {
-        const messageDiv = document.createElement("div");
-        messageDiv.classList.add("message", sender);
-        messageDiv.textContent = text;
-        chatBox.appendChild(messageDiv);
-        chatBox.scrollTop = chatBox.scrollHeight; // Scroll vers le bas
     }
+
+    function addMessageToChat(sender, text) {
+        const messageElement = document.createElement("div");
+        messageElement.classList.add("message");
+        messageElement.innerHTML = `<strong>${sender}:</strong> ${text}`;
+        chatBox.appendChild(messageElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    sendButton.addEventListener("click", sendMessage);
+    userInput.addEventListener("keypress", (event) => {
+        if (event.key === "Enter") sendMessage();
+    });
 });
