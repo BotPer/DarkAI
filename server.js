@@ -5,30 +5,30 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
 
+// Serve HTML file
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 const darkAI = new DarkAI();
 
-app.post('/api/chat', async (req, res) => {
-    const { model, message } = req.body;
+app.get('/api/chat', async (req, res) => {
+    const { model, message } = req.query;
 
     if (!message) {
-        return res.status(400).json({ error: "Message manquant" });
+        return res.status(400).json({ error: 'Tcho ça fait pitié' });
     }
 
     try {
-        const result = await darkAI.createAsyncGenerator(model, message);
+        const result = await darkAI.createAsyncGenerator(model, [{ text: message }]);
         res.status(200).json({ response: result });
     } catch (error) {
-        console.error("Erreur serveur:", error);
-        res.status(500).json({ error: "Erreur lors de la réponse de l'IA" });
+        console.error('Terjadi kesalahan:', error);
+        res.status(500).json({ error: 'Pauvre tapette, ton code est mal foutue' });
     }
 });
 
 app.listen(PORT, () => {
-    console.log(`Serveur en marche sur le port ${PORT}`);
+    console.log(`Yeah Dude, ton serveur est Nickel ! ${PORT}`);
 });
