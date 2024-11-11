@@ -4,9 +4,11 @@ const DarkAI = require('./DarkAI');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Middleware pour les fichiers statiques dans le dossier 'public'
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
-// Serve HTML file
+// Servir la page HTML principale
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
@@ -17,18 +19,18 @@ app.get('/api/chat', async (req, res) => {
     const { model, message } = req.query;
 
     if (!message) {
-        return res.status(400).json({ error: 'Tcho ça fait pitié' });
+        return res.status(400).json({ error: 'Message non fourni' });
     }
 
     try {
         const result = await darkAI.createAsyncGenerator(model, [{ text: message }]);
         res.status(200).json({ response: result });
     } catch (error) {
-        console.error('Terjadi kesalahan:', error);
-        res.status(500).json({ error: 'Pauvre tapette, ton code est mal foutue' });
+        console.error('Erreur:', error);
+        res.status(500).json({ error: 'Erreur lors de la récupération de la réponse de l\'IA' });
     }
 });
 
 app.listen(PORT, () => {
-    console.log(`Yeah Dude, ton serveur est Nickel ! ${PORT}`);
+    console.log(`Serveur démarré sur le port ${PORT}`);
 });
