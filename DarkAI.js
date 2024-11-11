@@ -2,7 +2,7 @@ const fetch = require('node-fetch'); // Assurez-vous d'avoir importé fetch
 
 class DarkAI {
   constructor() {
-    this.url = "https://doanything.ai/api/chat"; // URL de l'API
+    this.url = "https://doanything.ai/api/chat";
     this.headers = {
       "Content-Type": "application/json",
       "Accept": "*/*",
@@ -13,20 +13,19 @@ class DarkAI {
       "Sec-Fetch-Dest": "empty",
       "Accept-Language": "en-US,en;q=0.9"
     };
-    this.conversationHistory = []; // Historique de la conversation
   }
 
-  // Ajouter un message à l'historique
-  addToHistory(role, content) {
-    this.conversationHistory.push({ role, content });
-  }
-
-  // Méthode pour envoyer la requête et récupérer la réponse
   async fetchResponse(query) {
     const payload = {
-      model: "gpt-3.5-turbo-0613", // Modèle à utiliser
-      messages: this.conversationHistory, // Inclure l'historique complet
-      temperature: 0.7 // Température pour la diversité des réponses
+      model: {
+        id: "gpt-3.5-turbo-0613",
+        name: "GPT-3.5",
+        maxLength: 12000,
+        tokenLimit: 4000
+      },
+      messages: [{ role: "user", content: query }],
+      prompt: "You are a smart, responsive AI assistant...",
+      temperature: 0.7
     };
 
     try {
@@ -53,19 +52,9 @@ class DarkAI {
     }
   }
 
-  // Crée un générateur de réponse avec l'historique des messages
   async createAsyncGenerator(model, messages) {
-    // Ajouter le message de l'utilisateur à l'historique
-    const userMessage = messages[0].text;
-    this.addToHistory('user', userMessage);
-
-    // Obtenir la réponse de l'IA
-    const aiResponse = await this.fetchResponse(userMessage);
-
-    // Ajouter la réponse de l'IA à l'historique
-    this.addToHistory('assistant', aiResponse);
-
-    return aiResponse; // Retourner la réponse générée par l'IA
+    const message = messages[0].text;
+    return await this.fetchResponse(message);
   }
 }
 
